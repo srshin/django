@@ -10,9 +10,9 @@
 <h1> 직원관리 </h1>
 <c:set var="path" value="${pageContext.request.contextPath }"></c:set>
 
-
 <jsp:include page="/header.jsp"></jsp:include><br>
 insert from user2
+insert from user1
 
 <c:if test ="${sessionScope.emp!=null }">
 <ol>
