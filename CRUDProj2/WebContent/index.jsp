@@ -13,6 +13,7 @@
 <jsp:include page="/header.jsp"></jsp:include><br>
 insert from user2
 insert from user1
+branch1 from user1
 branch2 from user1
 <c:if test ="${sessionScope.emp!=null }">
 <ol>
