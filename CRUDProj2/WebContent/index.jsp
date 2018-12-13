@@ -17,7 +17,6 @@ branch1 from user1
 branch2 from user1
 network branch 
 
-=======
 branch11 from user1
 branch11 from user1 second commit
 pull request test 1 from gitTest1
@@ -29,6 +28,15 @@ pull request test 1 from gitTest1
 pull request test 1 from gitTest1
 
 
+branch11 from user1 from git2
+branch11 from user1 second commit
+pull request test 1 from git2
+pull request test 1 from git2
+pull request test 1 from git2
+pull request test 1 from git2
+pull request test 1 from git2
+pull request test 1 from git2
+pull request test 1 from git2
 <c:if test ="${sessionScope.emp!=null }">
 <ol>
 <li><a href="${path }/emp/emplist.go">직원조회</a></li>
