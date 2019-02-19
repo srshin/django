@@ -1,110 +1,107 @@
 package com.encore.controller;
 
+import java.io.IOException;
+import java.util.AbstractMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 
 import com.encore.model.CorpDAO;
-
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
+import com.encore.model.DetailVO;
 
 public class CrawlerDetail {
 
 	public static void main(String[] args) throws InterruptedException, IOException {
 		String driverLocation = "D:\\BigData\\Download\\chromedriver.exe";
 		System.setProperty("webdriver.chrome.driver", driverLocation);
-		SimpleDateFormat mSimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.KOREA);
-		String today = mSimpleDateFormat.format(new Date());
-		BufferedWriter bw = openFile(today);
 		WebDriver driver = new ChromeDriver();
-		locateURL(driver, bw);
+		locateURL(driver);
 		driver.quit();
 		System.out.println("프로그램을 종료합니다");
-		bw.close();
 
 	}
+//	create table detailList(
+//			 idDetail varchar2(200),
+//			 idNum varchar2(200),
+//			 corpName varchar2(100) ,
+//			 jobInfoHref  varchar2(500),
+//			 jobPeriod varchar2(1000), 
+//			 corpDetail varchar2(4000), 
+//			 jobInfoDetail   varchar2(4000)
+//			 );
+	public static void locateURL(WebDriver driver) {
+		String[][] tagList = { {"#container > h1 > span", "corpName"}, 
+				{"article.artReadPeriod","jobPeriod"}, 
+				{"article.artReadCoInfo.divReadBx","corpDetail"},
+				{"gib_frame"}, 
+				{"body", "jobInfoDetail"} 
+				};
+		String replceReg = "\\(|\\)|\\{|\\}|\\[|\\]|,|\"";
+		String newlineReg = "\r\n|\r|\n|\n\r";
 
-	public static BufferedWriter openFile(String mTime) {
-		String fileName = "jobKoreaDetail.csv";
-		String dirName = "csvFiles";
-		String header = "idNum, corpName,period,corpDetail,infoDetail";
-		BufferedWriter bw = null;
-		try {
-			bw = new BufferedWriter(new OutputStreamWriter(
-					new FileOutputStream(dirName + File.separator + mTime + "_" + fileName, true), "UTF-8"));
-			System.out.println(header);
-			bw.write(header);
-			bw.newLine();
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return bw;
-	}
 
-	public static void locateURL(WebDriver driver, BufferedWriter bw) {
-		String[] tagList = { "#container > h1 > span", "article.artReadPeriod", "article.artReadCoInfo.divReadBx",
-				"gib_frame", "body" };
-
-		String quote = "\"";
-		String delimiter = ",";
 		int currentLine = 1;
-		String column = "jobInfoHref";
+		Entry<String, String> columns= new AbstractMap.SimpleEntry<String, String>("idNum","jobInfoHref");
+		Entry<String, String> columnsDetail= new AbstractMap.SimpleEntry<String, String>("idDetail","jobInfoHref");
 		CorpDAO dao = new CorpDAO();
-		List<String> list = dao.selectByColumn(column);
-		List<String> mylist = list.subList(0, 5);
+		List<Entry<String, String>>  listCorp = dao.selectByColumns(columns);
+//		for (Entry<String, String>entry : listCorp) { 
+//			System.out.println(entry.getKey() + "="+ entry.getValue());
+//		};
+		Map<String, String>  listDetail = dao.selectByColumnsDetail(columnsDetail);
+		currentLine = listDetail.size()+1;
+		System.out.println(listDetail);
+		for (Entry<String,String> entry  : listCorp) {
+			if (listDetail.values().contains(entry.getValue())) {
+				System.out.println("중복 발견 "+ entry.getKey() +":  " + entry.getValue());
+				continue; 
+			}
+			if (currentLine == 10) {
+				driver.quit();
+				System.out.println("프로그램을 종료합니다");
+				System.exit(0);
 
-		for (String site : mylist) {
-			driver.get(site);
-			String item = "";
-			item += currentLine++ + ",";
-			try {
-				Thread.sleep(10000); // Let the user actually see something!
-				for (String tag : tagList) {
-					if (tag.equals("gib_frame")) {
+			}
+			DetailVO vo = new DetailVO();
+			vo.setIdDetail(String.valueOf(currentLine++));
+			vo.setIdNum(entry.getKey());
+			vo.setJobInfoHref(entry.getValue());
+			driver.get(entry.getValue());
+				for (String[] tag : tagList) {
+					if (tag[0].equals("gib_frame")) {
 						driver.switchTo().frame("gib_frame");
 						// driver.switchTo().parentFrame();
 						continue;
 					}
+					WebElement row = driver.findElement(By.cssSelector(tag[0]));
 
+					String text = row.getText().replaceAll(replceReg, " ").trim();
+					text = text.replaceAll(newlineReg, " ").trim();
 
-					WebElement row = driver.findElement(By.cssSelector(tag));
-					item += quote + row.getText() + quote + delimiter;
-
-					Thread.sleep(300); // Let the user actually see something!
-
+					switch(tag[1]) {
+					case "corpName": vo.setCorpName(text);break;
+					case "jobPeriod": vo.setJobPeriod(text);break;
+					case "corpDetail" : vo.setCorpDetail(text);break;
+					case "jobInfoDetail": vo.setJobInfoDetail(text);break;
+					default: System.out.println("error!");
+					}
 				}
-				System.out.println(item);
-				bw.write(item);
-				bw.newLine();
-
-			} catch (IOException | InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				System.out.println("element 읽다가 오류 ");
-			}
-		}
+				System.out.println(vo);
+				dao.insertDetail(vo);
+				try {
+					Thread.sleep(10000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} // Let the user actually see something!
+		}			
 
 	}
 

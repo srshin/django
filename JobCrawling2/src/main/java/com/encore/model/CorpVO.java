@@ -1,7 +1,7 @@
 package com.encore.model;
 
 public class CorpVO {
-	public int idNum;
+	public String idNum;
 	public String regDate;
 	public String corpName;
 	public String corpHref;
@@ -9,7 +9,7 @@ public class CorpVO {
 	public String jobInfoHref;
 	public String jobKeyword;
 	public String jobSpec;
-	
+	public String idDetail;
 	
 	
 	public CorpVO() {
@@ -18,30 +18,38 @@ public class CorpVO {
 	}
 
 
-
-	public CorpVO(int idNum, String regDate, String corpName, String corpHref, String jobInfo, String jobInfoHref, String jobKeyword,
-			String jobSpec) {
+	public CorpVO(String[] data) {
 		super();
-		this.idNum = idNum; 
-		this.regDate = regDate;
-		this.corpName = corpName;
-		this.corpHref = corpHref;
-		this.jobInfo = jobInfo;
-		this.jobInfoHref = jobInfoHref;
-		this.jobKeyword = jobKeyword;
-		this.jobSpec = jobSpec;
+		
+		this.idNum = data[0];
+		this.regDate = data[1];
+		this.corpName = data[2];
+		this.corpHref = data[3];
+		this.jobInfo = data[4];
+		this.jobInfoHref = data[5];
+		this.jobKeyword = data[6];
+		this.jobSpec = data[7];
+		if (data.length > 8 )
+			this.idDetail = data[8];
+		else 
+			this.idDetail = "0";
+
 	}
 
 
-
-	public int getIdNum() {
+	public String getIdNum() {
 		return idNum;
 	}
+
+
+	public void setIdNum(String idNum) {
+		this.idNum = idNum;
+	}
+
 
 	public String getRegDate() {
 		return regDate;
 	}
-
 
 
 	public void setRegDate(String regDate) {
@@ -49,11 +57,9 @@ public class CorpVO {
 	}
 
 
-
 	public String getCorpName() {
 		return corpName;
 	}
-
 
 
 	public void setCorpName(String corpName) {
@@ -61,11 +67,9 @@ public class CorpVO {
 	}
 
 
-
 	public String getCorpHref() {
 		return corpHref;
 	}
-
 
 
 	public void setCorpHref(String corpHref) {
@@ -73,11 +77,9 @@ public class CorpVO {
 	}
 
 
-
 	public String getJobInfo() {
 		return jobInfo;
 	}
-
 
 
 	public void setJobInfo(String jobInfo) {
@@ -85,11 +87,9 @@ public class CorpVO {
 	}
 
 
-
 	public String getJobInfoHref() {
 		return jobInfoHref;
 	}
-
 
 
 	public void setJobInfoHref(String jobInfoHref) {
@@ -97,11 +97,9 @@ public class CorpVO {
 	}
 
 
-
 	public String getJobKeyword() {
 		return jobKeyword;
 	}
-
 
 
 	public void setJobKeyword(String jobKeyword) {
@@ -109,11 +107,9 @@ public class CorpVO {
 	}
 
 
-
 	public String getJobSpec() {
 		return jobSpec;
 	}
-
 
 
 	public void setJobSpec(String jobSpec) {
@@ -121,16 +117,23 @@ public class CorpVO {
 	}
 
 
+	public String getIdDetail() {
+		return idDetail;
+	}
+
+
+	public void setIdDetail(String idDetail) {
+		this.idDetail = idDetail;
+	}
+
 
 	@Override
 	public String toString() {
-		return "CorpVO [idNum="+idNum + "regDate=" + regDate + ", corpName=" + corpName + ", corpHref=" + corpHref + ", jobInfo="
-				+ jobInfo + ", jobInfoHref=" + jobInfoHref + ", jobKeyword=" + jobKeyword + ", jobSpec=" + jobSpec
-				+ "]";
+		return "CorpVO [idNum=" + idNum + ", regDate=" + regDate + ", corpName=" + corpName + ", corpHref=" + corpHref
+				+ ", jobInfo=" + jobInfo + ", jobInfoHref=" + jobInfoHref + ", jobKeyword=" + jobKeyword + ", jobSpec="
+				+ jobSpec + ", idDetail=" + idDetail + "]";
 	}
-	
-	
-	
+
 	
 }
 

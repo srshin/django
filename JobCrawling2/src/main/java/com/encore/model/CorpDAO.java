@@ -1,17 +1,27 @@
 package com.encore.model;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import com.encore.util.OracleDBUtil;
 
+
 public class CorpDAO {
 
-	public static String DBTableName = "searchlist"; 
+	public static String DBTableName = "searchList"; 
+	public static String DBTableDetail = "detailList"; 
+	
+	
 	public int insertAll(List<CorpVO> list) {
 		Connection conn = null;
 		Statement st = null;
@@ -29,7 +39,8 @@ public class CorpDAO {
 									vo.getJobInfo() + "' , '" +
 									vo.getJobInfoHref() + "' , '" +
 									vo.getJobKeyword()  + "' , '" +
-									vo.getJobSpec() + "')";
+									vo.getJobSpec() +"' , '" +
+									vo.getIdDetail() + "')";
 				System.out.println(sql);
 				st.addBatch(sql);
 			}
@@ -65,16 +76,17 @@ public class CorpDAO {
 			st = conn.createStatement();
 			rs = st.executeQuery(sql);
 			while (rs.next()) {
-				CorpVO vo = new CorpVO(
-						rs.getInt("idNum"),
+				String[] data = {rs.getString("idNum"),
 						rs.getString("regDate"), 
 						rs.getString("corpName"),
 						rs.getString("corpHref"),
 						rs.getString("jobInfo"),
 						rs.getString("jobInfoHref"),
 						rs.getString("jobKeyword"),
-						rs.getString("jobSpec")
-						);
+						rs.getString("jobSpec"),
+						rs.getString("idDetail")
+				};
+				CorpVO vo = new CorpVO(data);
 				list.add(vo);
 			}
 		} catch (SQLException e) {
@@ -108,7 +120,140 @@ public class CorpDAO {
 
 		return list;
 	}
+
+	public List<Entry<String, String>> selectByColumns(Entry<String, String> columns2) {
+		Connection conn = null;
+		Statement st = null;
+		ResultSet rs = null;
+		List<Entry<String, String>> list = new ArrayList<>();
+		String sql = "select " + columns2.getKey() + ", " + columns2.getValue() +  " from " + DBTableName +
+				" order by to_number("+columns2.getKey() +")";
+		System.out.println(sql);
+		conn = OracleDBUtil.dbConnect();
+		try {
+			st = conn.createStatement();
+			rs = st.executeQuery(sql);
+			while (rs.next()) {
+				String key= rs.getString(columns2.getKey());
+				String value = rs.getString(columns2.getValue());
+				//System.out.println(key+value);
+				Entry<String, String> item= new AbstractMap.SimpleEntry<String, String>(key,value);
+				list.add(item);
+
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			OracleDBUtil.dbDisconnect(rs, st, conn);
+		}
+		return list;
+	}
+
+	public int updateColumn(int idNum, String column) {
+		Connection conn = null;
+		int result = 0;
+		PreparedStatement st = null;
+		String sql = "update " +  DBTableName + " set " + column + " =? " + " where idNum =?";
+		conn = OracleDBUtil.dbConnect();
+		try {
+			st = conn.prepareStatement(sql);
+			st.setInt(1, Integer.parseInt(column));
+			st.setInt(2, idNum);
+
+			result = st.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.out.println("update중 에러 발생 ");
+		} finally {
+			OracleDBUtil.dbDisconnect(null, st, conn);
+		}
+		return result;
+	}
+
+	public int insertDetail(DetailVO vo) {
+		Connection conn = null;
+		int result = 0;
+		PreparedStatement st = null;
+		String sql = "insert into " + DBTableDetail + 
+				" (idDetail, idNum, corpName, jobInfoHref,  jobPeriod, corpDetail,  jobInfoDetail) values(?, ?, ?, ?, ?, ?, ?)";
+
+		conn = OracleDBUtil.dbConnect();
+		try {
+			st = conn.prepareStatement(sql);
+			st.setString(1, vo.getIdDetail());
+			st.setString(2, vo.getIdNum());
+			st.setString(3, vo.getCorpName());
+			st.setString(4, vo.getJobInfoHref());
+			st.setString(5, vo.getJobPeriod());
+			st.setString(6, vo.getCorpDetail());
+			st.setString(7, vo.getJobInfoDetail());
+
+			result = st.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.out.println(e.getMessage());
+		} finally {
+			OracleDBUtil.dbDisconnect(null, st, conn);
+		}
+		return result;
+	}
+
+	public List<DetailVO> selectAllDetail() {
+		Connection conn = null;
+		Statement st = null;
+		ResultSet rs = null;
+		List<DetailVO> list = new ArrayList<>();
+		String sql = "select * from " + DBTableDetail;
+		conn = OracleDBUtil.dbConnect();
+		try {
+			st = conn.createStatement();
+			rs = st.executeQuery(sql);
+			while (rs.next()) {
+				String[] data = {rs.getString("idDetail"),
+						rs.getString("idNum"), 
+						rs.getString("corpName"),
+						rs.getString("jobInfoHref"),
+						rs.getString("jobPeriod"),
+						rs.getString("jobDetail"),
+						rs.getString("jobInfoDetail")
+				};
+				DetailVO vo = new DetailVO(data);
+				list.add(vo);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			OracleDBUtil.dbDisconnect(rs, st, conn);
+		}
+
+		return list;
+	}
+
+	public Map<String, String> selectByColumnsDetail(Entry<String, String> columns2) {
+		Connection conn = null;
+		Statement st = null;
+		ResultSet rs = null;
+		Map<String, String> map = new HashMap<>();
+		String sql = "select " + columns2.getKey() + ", " + columns2.getValue() +  " from " + DBTableDetail;
+		System.out.println(sql);
+		conn = OracleDBUtil.dbConnect();
+		try {
+			st = conn.createStatement();
+			rs = st.executeQuery(sql);
+			while (rs.next()) {
+				map.put(rs.getString(columns2.getKey()),rs.getString(columns2.getValue()));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			OracleDBUtil.dbDisconnect(rs, st, conn);
+		}
+
+		return map;
+	}
 	
+
+
 }
 
 

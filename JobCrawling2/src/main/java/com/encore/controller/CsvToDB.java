@@ -13,8 +13,7 @@ import com.encore.model.CorpVO;
 public class CsvToDB {
 	static String dirName = "csvFiles";
 	static String fileName = "jobKorea.csv";
-	static String today = "2019-02-16";
-	static int columeNum = 8;
+	static String today = "2019-02-18";
 
 	public static void main(String[] args) {
 		CorpDAO dao = new CorpDAO();
@@ -24,15 +23,16 @@ public class CsvToDB {
 
 			String line;
 			
-			br.readLine(); // 컬럼 제목 부분 버리기
+			// 컬럼 제목 읽어서 갯수 계산
+			int columeNum =br.readLine().split(",").length;
+			
 			while (true) {
 				line = br.readLine();
 				if (line == null)	break;
 				System.out.println(line);
 				String[] data = line.split(",", columeNum);
 				if (data.length <columeNum ) continue; 
-				CorpVO corp = new CorpVO(Integer.parseInt(data[0]), data[1], data[2], 
-						data[3], data[4], data[5], data[6], data[7]);
+				CorpVO corp = new CorpVO(data);
 				list.add(corp);
 				System.out.println(corp);
 			}
