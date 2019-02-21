@@ -52,9 +52,9 @@ public class CountWords {
 
 		List<Entry<String, Integer>> entryList = new ArrayList<Entry<String, Integer>>(sortedMap.entrySet()).
 				subList(0, Math.min(size, sortedMap.size()));
-		for (Entry<String, Integer> s : entryList) {
-			//System.out.println(s);
-		}
+//		for (Entry<String, Integer> s : entryList) {
+//			System.out.println(s);
+//		}
 		return entryList;
 	}
 }

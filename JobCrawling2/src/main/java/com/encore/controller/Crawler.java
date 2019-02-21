@@ -18,9 +18,22 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 
 public class Crawler {
-	static String header = "idNum,regDate,corpName,corpHref,jobInfo,jobInfoHref,jobKeyword,jobSpec";
+	static String header = "idNum,regDate,corpName,corpHref,jobInfo,jobInfoHref,jobKeyword,jobSpec,idDetail";
 	static String dirName = "csvFiles";
 	static String fileName = "jobKorea.csv";
+
+	public static void main(String[] args) throws InterruptedException, IOException {
+		SimpleDateFormat mSimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.KOREA);
+		String today = mSimpleDateFormat.format(new Date());
+		WebDriver driver = locateURL();
+		BufferedWriter bw = openFile(today);
+		makeList(driver, bw, today);
+		driver.quit();
+		int columeNum = header.split(",").length;
+		System.out.println("column 수는 " + columeNum);
+		System.out.println("프로그램을 종료합니다");
+		bw.close();
+	}
 
 	public static WebDriver locateURL() {
 		String url = "https://www.jobkorea.co.kr/";
@@ -63,6 +76,7 @@ public class Crawler {
 			System.out.println(header);
 			bw.write(header);
 			bw.newLine();
+			bw.flush();
 		} catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -111,11 +125,12 @@ public class Crawler {
 							line += tr.findElement(By.cssSelector(tag)).getAttribute("href") + delimiter;
 						// Thread.sleep(100);
 						line = line.replaceAll(newlineReg, " ").trim();
-
 					}
+					line +="no";
 					System.out.println(line);
 					bw.write(line);
 					bw.newLine();
+					bw.flush();
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					System.out.println("element 읽다가 오류 ");
@@ -150,16 +165,5 @@ public class Crawler {
 
 		}
 
-	}
-
-	public static void main(String[] args) throws InterruptedException, IOException {
-		SimpleDateFormat mSimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.KOREA);
-		String today = mSimpleDateFormat.format(new Date());
-		WebDriver driver = locateURL();
-		BufferedWriter bw = openFile(today);
-		makeList(driver, bw, today);
-		driver.quit();
-		System.out.println("프로그램을 종료합니다");
-		bw.close();
 	}
 }

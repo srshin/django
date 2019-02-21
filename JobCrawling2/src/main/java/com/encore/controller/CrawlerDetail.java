@@ -1,27 +1,29 @@
 package com.encore.controller;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
+import java.util.AbstractMap;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 
 import com.encore.model.CorpDAO;
-
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
+import com.encore.model.DetailVO;
 
 public class CrawlerDetail {
 
@@ -33,7 +35,7 @@ public class CrawlerDetail {
 		BufferedWriter bw = openFile(today);
 		WebDriver driver = new ChromeDriver();
 		locateURL(driver, bw);
-		driver.quit();
+		//driver.quit();
 		System.out.println("프로그램을 종료합니다");
 		bw.close();
 
@@ -41,19 +43,26 @@ public class CrawlerDetail {
 
 	public static BufferedWriter openFile(String mTime) {
 		String fileName = "jobKoreaDetail.csv";
-		String dirName = "csvFiles";
-		String header = "idNum, corpName,period,corpDetail,infoDetail";
+		String dirName = "csvDetailFiles";
+		String header = "idDetail, idNum, corpName, jobInfoHref, jobPeriod,corpDetail,jobInfoDetail";
+		File folder = new File(dirName);
 		BufferedWriter bw = null;
+
+		if (!folder.exists()) {
+			folder.mkdirs();
+		}
+		String fileFullName = dirName + File.separator + mTime + "_" + fileName;
+		File file = new File(fileFullName);
 		try {
-			bw = new BufferedWriter(new OutputStreamWriter(
-					new FileOutputStream(dirName + File.separator + mTime + "_" + fileName, true), "UTF-8"));
-			System.out.println(header);
-			bw.write(header);
-			bw.newLine();
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (FileNotFoundException e) {
+			if (file.exists()) {
+				bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file, true), "UTF-8"));
+			} else {
+				bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file, true), "UTF-8"));
+				System.out.println(header);
+				bw.write(header);
+				bw.newLine();
+			}
+		} catch (UnsupportedEncodingException | FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -64,45 +73,113 @@ public class CrawlerDetail {
 	}
 
 	public static void locateURL(WebDriver driver, BufferedWriter bw) {
-		String[] tagList = { "#container > h1 > span", "article.artReadPeriod", "article.artReadCoInfo.divReadBx",
-				"gib_frame", "body" };
-
-		String quote = "\"";
-		String delimiter = ",";
-		int currentLine = 1;
-		String column = "jobInfoHref";
+		String[][] tagList = { { "#container > h1 > span", "corpName" }, { "article.artReadPeriod", "jobPeriod" },
+				{ "article.artReadCoInfo.divReadBx", "corpDetail" }, { "gib_frame" }, { "body", "jobInfoDetail" } };
+		String replceReg = "\\(|\\)|\\{|\\}|\\[|\\]|,|\"";
+		String newlineReg = "\r\n|\r|\n|\n\r";
 		CorpDAO dao = new CorpDAO();
-		List<String> list = dao.selectByColumn(column);
-		List<String> mylist = list.subList(0, 5);
 
-		for (String site : mylist) {
-			driver.get(site);
-			String item = "";
-			item += currentLine++ + ",";
+		Entry<String, String> columnsSearch = new AbstractMap.SimpleEntry<String, String>("idNum", "jobInfoHref");
+		Entry<String, String> columnsDetail = new AbstractMap.SimpleEntry<String, String>("idDetail", "jobInfoHref");
+		List<Entry<String, String>> listSearch = dao.selectByColumns(columnsSearch);
+		Map<String, String> listDetail = dao.selectByColumnsDetail(columnsDetail);
+
+		// for (Entry<String, String>entry : listSearch) {
+		// System.out.println(entry.getKey() + "="+ entry.getValue());
+		// };
+
+		int lineCount = 1;
+		int currentLineDetail = dao.selectCurrentLine("idDetail")+1;
+		System.out.println("currentLine:"+currentLineDetail);
+		System.out.println(listDetail);
+		System.out.println(listSearch);
+		for (Entry<String, String> entrySearch : listSearch) {
+			String idNum = entrySearch.getKey();
+			String jobInfoHref = entrySearch.getValue();
+			System.out.println(lineCount+"개째 페이지입니다");
+
+			if (listDetail.values().contains(jobInfoHref)) {
+				for (Entry<String, String> detailEntry : listDetail.entrySet()) {
+					if (detailEntry.getValue().equals(jobInfoHref)) {
+						String existIdDetail = detailEntry.getKey();
+						System.out.println("중복 발견 " + idNum + ":  " + jobInfoHref + "detailId:  " + existIdDetail);
+						dao.updateColumn(idNum, "idDetail", existIdDetail);
+						break;
+					}
+				}
+				continue;
+			}
+			if (lineCount++ == 50) {
+				//driver.quit();
+				try {
+					bw.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				System.out.println("프로그램을 종료합니다");
+				System.exit(0);
+			}
 			try {
-				Thread.sleep(10000); // Let the user actually see something!
-				for (String tag : tagList) {
-					if (tag.equals("gib_frame")) {
+				Thread.sleep(50000);
+
+				String idDetail = String.valueOf(currentLineDetail);
+				String corpName= null;
+				String jobPeriod= null;
+				String corpDetail = null;
+				String jobInfoDetail = null; 
+
+				driver.get(jobInfoHref);
+
+				for (String[] tag : tagList) {
+					if (tag[0].equals("gib_frame")) {
 						driver.switchTo().frame("gib_frame");
 						// driver.switchTo().parentFrame();
 						continue;
 					}
-
-
-					WebElement row = driver.findElement(By.cssSelector(tag));
-					item += quote + row.getText() + quote + delimiter;
-
-					Thread.sleep(300); // Let the user actually see something!
-
+					WebElement row = driver.findElement(By.cssSelector(tag[0]));
+					String text = row.getText().replaceAll(replceReg, " ").trim();
+					text = text.replaceAll(newlineReg, " ").trim();
+					text = text.replaceAll("\\s\\s+", " ");
+					if (text.equals(""))
+						text = "내용없음";
+					switch (tag[1]) {
+					case "corpName":
+						corpName=text;
+						break;
+					case "jobPeriod":
+						jobPeriod=text;
+						break;
+					case "corpDetail":
+						corpDetail=text;
+						break;
+					case "jobInfoDetail":
+						jobInfoDetail=text;
+						break;
+					default:
+						System.out.println("error!");
+					}
 				}
-				System.out.println(item);
-				bw.write(item);
-				bw.newLine();
 
-			} catch (IOException | InterruptedException e) {
+				dao.updateColumn(idNum, "idDetail", idDetail);
+				DetailVO vo = new DetailVO(idDetail, idNum, corpName, jobInfoHref, jobPeriod, corpDetail, jobInfoDetail);
+				currentLineDetail++;
+				dao.insertDetail(vo);
+				bw.write(vo.toline());
+				bw.newLine();
+				bw.flush();
+				System.out.println(vo);
+				Thread.sleep(20000);
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-				System.out.println("element 읽다가 오류 ");
+			} catch (org.openqa.selenium.UnhandledAlertException| org.openqa.selenium.NoSuchElementException e) {
+				e.printStackTrace();
+				dao.updateColumn(idNum, "idDetail", "0");
+				System.out.println("해당 element가 없어서 에러입니다.계속 진행합니다");
 			}
 		}
 

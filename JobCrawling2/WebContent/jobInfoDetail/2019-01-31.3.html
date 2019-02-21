@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script>
+$(function(){
+	$('#btn1').click(function(){
+		$('#here').load('../JS/myData/student.csv');
+		
+	});
+	$('#btn2').click(function(){
+		//파라메터가 없는 경우
+		$.get("../JS/myData/data.jsp",function(data,status){
+			$('#here').html(data+" :"+ status);
+		});
+	});
+	$('#btn3').click(function(){
+		//파라메터가 있는 경우
+		var id = $('#userid').val();
+		var email = $('#email').val();
+		var param = {};
+		param.data1=id;
+		param.data2=email;
+		console.log($('#email'));
+		//var param = "data1="+id+"&data2="+email;
+		$.get("../JS/myData/data.jsp",param, function(data,status){
+			$('#here').html(data+" :"+ status);
+		});
+	});
+	$('#btn4').click(function(){
+		//파라메터가 있는 경우
+		var id = $('#userid').val();
+		var email = $('#email').val();
+		var param = {};
+		param.data1=id;
+		param.data2=email;
+		console.log(param);
+		console.log($('#email'));
+		//var param = "data1="+id+"&data2="+email;
+		$.post("../JS/myData/data.jsp",param, function(data,status){
+			$('#here').html(data+" :"+ status);
+		});
+	});
+	
+	$('#btn5').click(function(){
+		//파라메터가 있는 경우
+		var param = {"data1": $('#userid').val(),
+					 "data2": $('#email').val()};
+	 	console.log(param);
+		$.ajax({
+            type:"GET",
+            url:"../JS/myData/data.jsp",
+            data : param,
+            dataType : "json", //받은데이터  text
+            success: function( obj){
+                for(var pro in obj){
+                    $("#here").append("<p>" + obj[pro] + "</p>");
+                }
+            },
+            error: function(xhr){
+                $("#here").html(xhr.status + "--" + xhr.statusText);
+            }
+		});
+	});
+	$('#btn6').click(function(){
+		//파라메터가 있는 경우
+		var urls = "https://api.bithumb.com/public/ticker/ALL";
+		$.ajax({
+            type:"GET",
+            url:urls,
+            data : null,
+            dataType : "json", //받은데이터  text
+            success: function(obj){
+            	console.log(obj);
+            	console.log(obj.data);
+                for(var coinType in obj.data){
+                    $("#here").append("<br>"+coinType+" " );
+                    for (var infotype in obj.data[coinType]) {
+                        $("#here").append(obj.data[coinType][infotype]+", " );
+                	}
+                }
+            },
+            error: function(xhr){
+                $("#here").html(xhr.status + "--" + xhr.statusText);
+            }
+		});
+	});
+
+
+	
+	$('#btn7').click(function(){
+		var  obj = {"data":{
+							"BTC":{"volume_1day":"3836.86305622","volume_7day":"21300.44879418","buy_price":"3814000"},
+			                "ETH":{"volume_1day":"111313.20135569","volume_7day":"470166.335330985817401567","buy_price":"119800"},
+			                "DASH":{"volume_1day":"5697784.2662092","volume_7day":"38231818.98739","buy_price":"75100"}
+							}
+					}
+			obj1 = obj["data"];
+		for (var key in obj1) {
+			console.log(key);
+			var obj2= obj1[key];
+			console.log(obj2);
+			for (key2 in obj2)
+			console.log(key2 + obj2[key2]);
+		}
+		
+	});
+	
+	$('#myfrm').on("submit", function(event){
+		event.preventDefault(); //default이벤트 취소
+		//ajax 코드
+/* 		var param = {"data1": $('#userid').val(),
+					 "data2": $('#email').val()};
+ */
+        //form의 입력데이터를 쿼리스트링으로 만들어준다
+ 		var param = $('#myfrm').serialize();
+ 		alert(param);
+ 		param = $('#myfrm').serializeArray();
+ 		alert(param);
+		console.log(param);
+		$.ajax({
+			type:"get",
+			url:"empRegister.jsp",
+			data: param,
+			dataType:'text',
+			success:  function(result){
+                    $("#here").html(result);
+			},
+			error:function(xhr){
+                $("#here").html(xhr.status + "--" + xhr.statusText);
+			}
+		});
+	});
+});
+
+</script>
+
+<script>
+</script>
+</head>
+<body>
+<h1>JQuery AJAX</h1>
+<button id='btn1'>load함수</button>
+<button id='btn2'>get(parameterd없음)함수</button>
+<button id='btn3'>get(parameter있음)함수</button>
+<button id='btn4'>post함수</button>
+<button id='btn5'>ajax함수</button>
+<button id='btn6'>bitcoin가져오기</button>
+<button id='btn7'>javaobject parsing</button>
+
+<hr>
+파라메터1 <input type='text' id='userid'><br>
+파라메터2 <input type='text' id='email'><br>
+<div id='here'>HERE</div>
+
+<form id='myfrm' action="empRegister.jsp">
+userid <input type='text' id='userid' name='userid'><br>
+email <input type='text' id='email' name='email'><br>
+<input type="submit" value="전송">
+</form>
+</body>
+</html>
