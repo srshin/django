@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<script>
+	$(function() {
+		
+		(function(){
+			$.ajax({
+				type : "GET",
+				url : "deptlist.jsp",
+				data : null,
+				dataType : "text", //받은데이터  text
+				success : function(text) {
+					$("#deptselect").append(text);
+					$("#deptselect").find("#department_id").on("change", function(){
+						$("#btndept").trigger("click");
+					});
+				},
+				error : function(xhr) {
+					$("#container").html(xhr.status + "--" + xhr.statusText);
+				}
+			});
+		})();
+		
+		$('#btndept').click(function() {
+			$.ajax({
+				type : "GET",
+				url : "emplist.jsp",
+				data : {"deptId": $('#department_id').val()},
+				dataType : "text", //받은데이터  text
+				success : function(text) {
+					$("#container").html(text);
+				},
+				error : function(xhr) {
+					$("#container").html(xhr.status + "--" + xhr.statusText);
+				}
+			});
+		});
+			
+		$("#empId").on("keyup", function(event){
+			if (event.keyCode == 13) {
+				$('#btn2').trigger("click");
+			}	
+		});
+		$('#btn1').click(function() {
+			$.ajax({
+				type : "GET",
+				url : "emplist.jsp",
+				data : null,
+				dataType : "text", //받은데이터  text
+				success : function(text) {
+					$("#container").text("");
+					$("#container").append(text);
+				},
+				error : function(xhr) {
+					$("#container").html(xhr.status + "--" + xhr.statusText);
+				}
+			});
+		});
+		
+		detailView = function (empId) {
+			if(empId==null || empId=='') {
+				alert("사원번호를 입력하세요");
+				return; 
+			}
+			var param = {"empId": empId};
+			console.log(empId);
+			$.ajax({
+				type : "GET",
+				url : "empDetail.jsp",
+				data : param,
+				dataType : "text", //받은데이터  text
+				success : function(text) {
+					$("#container").text("");
+					$("#container").append(text);
+					$('#detailForm').on("submit",function (event){
+						event.preventDefault(); //default이벤트 취소
+				 		update(param);
+					});
+				},
+				error : function(xhr) {
+					$("#here").html(xhr.status + "--" + xhr.statusText);
+				}
+			});
+		};
+		
+		$('#btn2').click(function() { //수정
+				var empId = $('#empId').val();
+				detailView(empId);
+		});
+		$('#btn3').click(function() { //신규
+			$.ajax({
+				type : "GET",
+				url : "empInsert.jsp",
+				data : null,
+				dataType : "text", //받은데이터  text
+				success : function(text) {
+					$("#container").text("");
+					$("#container").append(text);
+					$('#myform').on("submit",function (event){
+						event.preventDefault(); //default이벤트 취소
+				 		insert();
+					});
+				},
+				error : function(xhr) {
+					$("#here").html(xhr.status + "--" + xhr.statusText);
+				}
+			});
+		});
+		insert = function(){
+	 		var param = $('#myform').serialize();
+			$.ajax({
+				type : "GET",
+				url : "empResult.jsp",
+				data : param,
+				dataType : "text", //받은데이터  text
+				success : function(text) {
+					$("#container").text("");
+					$("#container").append(text);
+				},
+				error : function(xhr) {
+					$("#here").html(xhr.status + "--" + xhr.statusText);
+				}
+			});
+		}
+		update = function(){
+	 		var param = $('#detailForm').serialize();
+	 		console.log(param);
+			$.ajax({
+				type : "GET",
+				url : "empUpdateResult.jsp",
+				data : param,
+				dataType : "text", //받은데이터  text
+				success : function(text) {
+					$("#container").text("");
+					$("#container").append(text);
+				},
+				error : function(xhr) {
+					$("#here").html(xhr.status + "--" + xhr.statusText);
+				}
+			});
+		}
+	});
+</script>
+</head>
+<body>
+	<h1>CRUD를 jquery ajax로 구현하기 </h1>
+	<button id='btn1'>직원전체조회</button>
+	<span id='deptselect'></span>
+	<button id='btndept'>부서로 조회</button>
+	<input type='text' name='empId' id='empId'>
+	<button id='btn2'>수정</button>
+	<button id='btn3'>신규</button>
+	<hr>
+	<div id='container'></div>
+
+</body>
+</html>

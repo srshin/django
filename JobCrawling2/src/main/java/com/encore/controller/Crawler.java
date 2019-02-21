@@ -18,7 +18,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 
 public class Crawler {
-	static String header = "idNum,regDate,corpName,corpHref,jobInfo,jobInfoHref,jobKeyword,jobSpec";
+	static String header = "idNum,regDate,corpName,corpHref,jobInfo,jobInfoHref,jobKeyword,jobSpec,idDetail";
 	static String dirName = "csvFiles";
 	static String fileName = "jobKorea.csv";
 
@@ -76,6 +76,7 @@ public class Crawler {
 			System.out.println(header);
 			bw.write(header);
 			bw.newLine();
+			bw.flush();
 		} catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -124,11 +125,12 @@ public class Crawler {
 							line += tr.findElement(By.cssSelector(tag)).getAttribute("href") + delimiter;
 						// Thread.sleep(100);
 						line = line.replaceAll(newlineReg, " ").trim();
-
 					}
+					line +="no";
 					System.out.println(line);
 					bw.write(line);
 					bw.newLine();
+					bw.flush();
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					System.out.println("element 읽다가 오류 ");

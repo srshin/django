@@ -4,8 +4,11 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import com.encore.model.CorpDAO;
 import com.encore.model.CorpVO;
@@ -13,9 +16,11 @@ import com.encore.model.CorpVO;
 public class CsvToDB {
 	static String dirName = "csvFiles";
 	static String fileName = "jobKorea.csv";
-	static String today = "2019-02-18";
+	//static String today = "2019-02-18";
 
 	public static void main(String[] args) {
+		SimpleDateFormat mSimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.KOREA);
+		String today = mSimpleDateFormat.format(new Date());
 		CorpDAO dao = new CorpDAO();
 		String path = dirName + "\\" + today + "_" + fileName;
 		List<CorpVO> list = new ArrayList<CorpVO>();

@@ -19,6 +19,17 @@ public class DetailVO {
 	public String jobInfoDetail;
 	
 	
+	public DetailVO(String idDetail, String idNum, String corpName, String jobInfoHref, String jobPeriod,
+			String corpDetail, String jobInfoDetail) {
+		super();
+		this.idDetail = idDetail;
+		this.idNum = idNum;
+		this.corpName = corpName;
+		this.jobInfoHref = jobInfoHref;
+		this.jobPeriod = jobPeriod;
+		this.corpDetail = corpDetail;
+		this.jobInfoDetail = jobInfoDetail;
+	}
 	public DetailVO(String[] data) {
 		super();
 		this.idDetail = data[0];
@@ -80,6 +91,9 @@ public class DetailVO {
 		return "DetailVO \nidDetail=" + idDetail + ", \nidNum=" + idNum + ", \ncorpName=" + corpName + ", \njobInfoHref="
 				+ jobInfoHref + ",\njobPeriod=" + jobPeriod + ", \ncorpDetail=" + corpDetail + ", \njobInfoDetail="
 				+ jobInfoDetail;
+	}
+	public String toline() {
+		return idDetail + ", "+ idNum + ", " + corpName + ", " + jobInfoHref + "," + jobPeriod + ", " + corpDetail + "," + jobInfoDetail;
 	}
 	
 	

@@ -1,5 +1,12 @@
 package com.encore.controller;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+
 public class Test {
 
 	public static void main(String[] args) {
@@ -24,6 +31,21 @@ public class Test {
 		String s = "  The    dog   has a long   tail,  and  it is RED!";
 		s = s.replaceAll("\\s\\s+", " ");
 		System.out.println(s);
+		
+		File file = new File("a.txt");
+
+			try {
+				BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(
+						new FileOutputStream(file, true), "UTF-8"));
+				if (file.exists()) 
+					System.out.println("file exist");
+				else 
+					System.out.println("file new");
+			} catch (UnsupportedEncodingException | FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
 
 	}
 

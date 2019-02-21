@@ -32,7 +32,7 @@ public class CorpVO {
 		if (data.length > 8 )
 			this.idDetail = data[8];
 		else 
-			this.idDetail = "0";
+			this.idDetail = "no";
 
 	}
 

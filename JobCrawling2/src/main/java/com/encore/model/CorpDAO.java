@@ -126,17 +126,20 @@ public class CorpDAO {
 		Statement st = null;
 		ResultSet rs = null;
 		List<Entry<String, String>> list = new ArrayList<>();
-		String sql = "select " + columns2.getKey() + ", " + columns2.getValue() +  " from " + DBTableName +
-				" order by to_number("+columns2.getKey() +")";
+//		String sql = "select " + columns2.getKey() + ", " + columns2.getValue() +  " from " + DBTableName +
+//				" where idDetail is null " +
+//				" order by to_number("+columns2.getKey() +")";
+		String sql = "select idNum, jobInfoHref from searchList where IDDETAIL='no' order by to_number(idNum)";
 		System.out.println(sql);
 		conn = OracleDBUtil.dbConnect();
 		try {
+			System.out.println("try");
 			st = conn.createStatement();
 			rs = st.executeQuery(sql);
 			while (rs.next()) {
 				String key= rs.getString(columns2.getKey());
 				String value = rs.getString(columns2.getValue());
-				//System.out.println(key+value);
+				System.out.println(key+value);
 				Entry<String, String> item= new AbstractMap.SimpleEntry<String, String>(key,value);
 				list.add(item);
 
@@ -149,7 +152,7 @@ public class CorpDAO {
 		return list;
 	}
 
-	public int updateColumn(int idNum, String column) {
+	public int updateColumn(String idNum, String column, String value) {
 		Connection conn = null;
 		int result = 0;
 		PreparedStatement st = null;
@@ -157,8 +160,8 @@ public class CorpDAO {
 		conn = OracleDBUtil.dbConnect();
 		try {
 			st = conn.prepareStatement(sql);
-			st.setInt(1, Integer.parseInt(column));
-			st.setInt(2, idNum);
+			st.setString(1, value);
+			st.setString(2, idNum);
 
 			result = st.executeUpdate();
 		} catch (SQLException e) {
@@ -250,6 +253,28 @@ public class CorpDAO {
 		}
 
 		return map;
+	}
+
+	public int selectCurrentLine(String column) {
+		int max = 0; 
+		Connection conn = null;
+		Statement st = null;
+		ResultSet rs = null;
+		String sql = "select max(to_number( " + column + " )) max from  " + DBTableDetail;
+		System.out.println(sql);
+		conn = OracleDBUtil.dbConnect();
+		try {
+			st = conn.createStatement();
+			rs = st.executeQuery(sql);
+			if (rs.next()) {
+				max =rs.getInt("max");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			OracleDBUtil.dbDisconnect(rs, st, conn);
+		}
+		return max;
 	}
 	
 
