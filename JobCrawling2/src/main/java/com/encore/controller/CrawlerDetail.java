@@ -2,11 +2,10 @@ package com.encore.controller;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.AbstractMap;
 import java.util.Date;
@@ -14,13 +13,16 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
+import org.jsoup.Connection;
+import org.jsoup.Connection.Response;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import com.encore.model.CorpDAO;
 import com.encore.model.DetailVO;
@@ -28,56 +30,84 @@ import com.encore.model.DetailVO;
 public class CrawlerDetail {
 
 	public static void main(String[] args) throws InterruptedException, IOException {
-		String driverLocation = "D:\\BigData\\Download\\chromedriver.exe";
-		System.setProperty("webdriver.chrome.driver", driverLocation);
-		SimpleDateFormat mSimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.KOREA);
-		String today = mSimpleDateFormat.format(new Date());
-		BufferedWriter bw = openFile(today);
-		WebDriver driver = new ChromeDriver();
-		locateURL(driver, bw);
-		//driver.quit();
+		locateURL();
 		System.out.println("프로그램을 종료합니다");
-		bw.close();
-
 	}
 
-	public static BufferedWriter openFile(String mTime) {
-		String fileName = "jobKoreaDetail.csv";
-		String dirName = "csvDetailFiles";
-		String header = "idDetail, idNum, corpName, jobInfoHref, jobPeriod,corpDetail,jobInfoDetail";
-		File folder = new File(dirName);
-		BufferedWriter bw = null;
+	public static String getDigit(String url) {
+		String digits = null;
+		Pattern pattern = Pattern.compile("([\\d]{5,})");
+		Matcher m = pattern.matcher(url);
+		if (m.find())
+			digits = m.group();
+		return digits;
+	}
 
+	public static String getFilePath(String id, String fileNum) {
+		String filePath = null;
+		SimpleDateFormat mSimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.KOREA);
+		// String today = mSimpleDateFormat.format(new Date());
+		String today = "2019-02-25";
+
+		String fileName = "detail.csv";
+		String dirName = "csvDetailFiles";
+		String dirPath = dirName + File.separator + today;
+		File folder = new File(dirPath);
 		if (!folder.exists()) {
 			folder.mkdirs();
 		}
-		String fileFullName = dirName + File.separator + mTime + "_" + fileName;
+		filePath = dirPath + File.separator + id + "_" + fileNum + "_" + fileName;
+		return filePath;
+
+	}
+
+	public static BufferedWriter openFile(String fileFullName) {
+		BufferedWriter bw = null;
+
 		File file = new File(fileFullName);
+		System.out.println(fileFullName);
 		try {
-			if (file.exists()) {
-				bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file, true), "UTF-8"));
-			} else {
-				bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file, true), "UTF-8"));
-				System.out.println(header);
-				bw.write(header);
-				bw.newLine();
-			}
-		} catch (UnsupportedEncodingException | FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file, false), "UTF-8"));
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			System.out.println("파일 오류로 프로그램을 종료합니다");
+			System.exit(0);
 		}
 		return bw;
 	}
 
-	public static void locateURL(WebDriver driver, BufferedWriter bw) {
-		String[][] tagList = { { "#container > h1 > span", "corpName" }, { "article.artReadPeriod", "jobPeriod" },
-				{ "article.artReadCoInfo.divReadBx", "corpDetail" }, { "gib_frame" }, { "body", "jobInfoDetail" } };
+	public static Response getIframe(String jobInfoHref, String url, Map<String, String> cookies) {
+		Response response = null;
+
+		try {
+			response = Jsoup.connect("http://www.jobkorea.co.kr"+url)
+					.header("Accept",
+							"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8")
+					.header("Accept-Encoding", "gzip, deflate")
+					.header("Accept-Language", "ko-KR,ko;q=0.8,en-US;q=0.6,en;q=0.4").header("Connection", "keep-alive")
+					.cookies(cookies).header("Host", "www.jobkorea.co.kr").header("Referer", jobInfoHref)
+					.header("Upgrade-Insecure-Requests", "1")
+					.userAgent(
+							"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36")
+					.method(Connection.Method.GET)
+					.execute();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if (response.statusCode() != 200) {
+			System.out.println("response error로 프로그램 종료됩니다");
+			System.exit(0);
+		}
+		return response;
+	}
+
+	public static void locateURL() {
 		String replceReg = "\\(|\\)|\\{|\\}|\\[|\\]|,|\"";
 		String newlineReg = "\r\n|\r|\n|\n\r";
+
 		CorpDAO dao = new CorpDAO();
+		int count = 0;
 
 		Entry<String, String> columnsSearch = new AbstractMap.SimpleEntry<String, String>("idNum", "jobInfoHref");
 		Entry<String, String> columnsDetail = new AbstractMap.SimpleEntry<String, String>("idDetail", "jobInfoHref");
@@ -88,101 +118,73 @@ public class CrawlerDetail {
 		// System.out.println(entry.getKey() + "="+ entry.getValue());
 		// };
 
-		int lineCount = 1;
-		int currentLineDetail = dao.selectCurrentLine("idDetail")+1;
-		System.out.println("currentLine:"+currentLineDetail);
-		System.out.println(listDetail);
-		System.out.println(listSearch);
+		int idDetailNum = dao.selectCurrentLine("idDetail") + 1;
+		System.out.println("idDetail:" + idDetailNum);
+		// System.out.println(listDetail);
+		// System.out.println(listSearch);
 		for (Entry<String, String> entrySearch : listSearch) {
 			String idNum = entrySearch.getKey();
 			String jobInfoHref = entrySearch.getValue();
-			System.out.println(lineCount+"개째 페이지입니다");
+			System.out.println("idNum: " + idNum + " jobInfoHref : " + jobInfoHref);
 
-			if (listDetail.values().contains(jobInfoHref)) {
-				for (Entry<String, String> detailEntry : listDetail.entrySet()) {
-					if (detailEntry.getValue().equals(jobInfoHref)) {
-						String existIdDetail = detailEntry.getKey();
-						System.out.println("중복 발견 " + idNum + ":  " + jobInfoHref + "detailId:  " + existIdDetail);
-						dao.updateColumn(idNum, "idDetail", existIdDetail);
-						break;
+			try {
+				if (listDetail.values().contains(jobInfoHref)) {
+					for (Entry<String, String> detailEntry : listDetail.entrySet()) {
+						if (detailEntry.getValue().equals(jobInfoHref)) {
+							String existIdDetail = detailEntry.getKey();
+							System.out.println("중복 발견 " + idNum + ":  " + jobInfoHref + "detailId:  " + existIdDetail);
+							//dao.updateColumn(idNum, "idDetail", existIdDetail);
+							break;
+						}
 					}
+					continue;
 				}
-				continue;
-			}
-			if (lineCount++ == 50) {
-				//driver.quit();
-				try {
-					bw.close();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+
+				Response response = Jsoup.connect(jobInfoHref).method(Connection.Method.GET).execute();
+				if (response.statusCode() != 200) {
+					System.out.println("response error로 프로그램 종료됩니다");
+					System.exit(0);
 				}
-				System.out.println("프로그램을 종료합니다");
+				Document doc = response.parse();
+				String idDetail = Integer.toString(idDetailNum++);
+				String ref = getDigit(jobInfoHref);
+				String filePath = getFilePath(idDetail, ref);
+				if (jobInfoHref.contains("www.jobkorea.co.kr")) {
+					String corpName = doc.select("#container > h1 > span").text().replaceAll(newlineReg, " ")
+							.replaceAll("\\s\\s+", " ").replaceAll(newlineReg, " ").trim();
+					String jobPeriod = doc.select("article.artReadPeriod").text().replaceAll(newlineReg, " ")
+							.replaceAll("\\s\\s+", " ").replaceAll(newlineReg, " ").trim();
+					String corpDetail = doc.select("article.artReadCoInfo.divReadBx").text().replaceAll(newlineReg, " ")
+							.replaceAll("\\s\\s+", " ").replaceAll(newlineReg, " ").trim();
+//					<iframe src="http://www.work.go.kr/outOffer/empInfo/empDetailView.do?wantedAuthNo=K170051902140035" 
+//							name="gib_frame" id="gib_frame" width="670" height="450" noresize="" 
+//							scrolling="yes" frameborder="0" marginheight="0" marginwidth="0" title="상세요강"></iframe>
+					String iframeSrc = doc.selectFirst("#gib_frame").attr("src");
+					System.out.println("framesrc : " +iframeSrc);
+
+					Map<String, String> cookies = response.cookies();
+					response = getIframe(jobInfoHref, iframeSrc, cookies);
+					//doc = response.parse();
+					DetailVO vo = new DetailVO(idDetail, idNum, jobInfoHref, corpName, jobPeriod, corpDetail, filePath);
+					//dao.insertDetail(vo);
+				} else {
+					DetailVO vo = new DetailVO(idDetail, idNum, jobInfoHref, "회사이름", "기간정보", "회사정보", filePath);
+					//dao.insertDetail(vo);
+				}
+				System.out.println(doc.text());
+				BufferedWriter bw = openFile(filePath);
+				bw.write(doc.text());
+				bw.flush();
+				bw.close();
+				//dao.updateColumn(idNum, "idDetail", idDetail);
+				TimeUnit.SECONDS.sleep(30);
+			} catch (Exception e) {
+				e.printStackTrace();
+				System.out.println("에러 발생하여 프로그램 종료합니다. ");
 				System.exit(0);
 			}
-			try {
-				Thread.sleep(50000);
-
-				String idDetail = String.valueOf(currentLineDetail);
-				String corpName= null;
-				String jobPeriod= null;
-				String corpDetail = null;
-				String jobInfoDetail = null; 
-
-				driver.get(jobInfoHref);
-
-				for (String[] tag : tagList) {
-					if (tag[0].equals("gib_frame")) {
-						driver.switchTo().frame("gib_frame");
-						// driver.switchTo().parentFrame();
-						continue;
-					}
-					WebElement row = driver.findElement(By.cssSelector(tag[0]));
-					String text = row.getText().replaceAll(replceReg, " ").trim();
-					text = text.replaceAll(newlineReg, " ").trim();
-					text = text.replaceAll("\\s\\s+", " ");
-					if (text.equals(""))
-						text = "내용없음";
-					switch (tag[1]) {
-					case "corpName":
-						corpName=text;
-						break;
-					case "jobPeriod":
-						jobPeriod=text;
-						break;
-					case "corpDetail":
-						corpDetail=text;
-						break;
-					case "jobInfoDetail":
-						jobInfoDetail=text;
-						break;
-					default:
-						System.out.println("error!");
-					}
-				}
-
-				dao.updateColumn(idNum, "idDetail", idDetail);
-				DetailVO vo = new DetailVO(idDetail, idNum, corpName, jobInfoHref, jobPeriod, corpDetail, jobInfoDetail);
-				currentLineDetail++;
-				dao.insertDetail(vo);
-				bw.write(vo.toline());
-				bw.newLine();
-				bw.flush();
-				System.out.println(vo);
-				Thread.sleep(20000);
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (org.openqa.selenium.UnhandledAlertException| org.openqa.selenium.NoSuchElementException e) {
-				e.printStackTrace();
-				dao.updateColumn(idNum, "idDetail", "0");
-				System.out.println("해당 element가 없어서 에러입니다.계속 진행합니다");
-			}
+			if (count++ == 5)
+				break;
 		}
-
 	}
-
 }

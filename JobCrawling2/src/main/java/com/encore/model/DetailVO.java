@@ -1,31 +1,23 @@
 package com.encore.model;
-//
-//create table detailList(
-//		 idDetail varchar2(200),
-//		 idNum varchar2(200),
-//		 corpName varchar2(100) ,
-//		 jobInfoHref  varchar2(500),
-//		 jobPeriod varchar2(1000), 
-//		 corpDetail varchar2(4000), 
-//		 jobInfoDetail   varchar2(4000)
-//		 );
+
 public class DetailVO {
+	 
 	public String idDetail;
 	public String idNum;
-	public String corpName;
 	public String jobInfoHref;
+	public String corpName;
 	public String jobPeriod;
 	public String corpDetail;
 	public String jobInfoDetail;
 	
 	
-	public DetailVO(String idDetail, String idNum, String corpName, String jobInfoHref, String jobPeriod,
+	public DetailVO(String idDetail, String idNum, String jobInfoHref, String corpName, String jobPeriod,
 			String corpDetail, String jobInfoDetail) {
 		super();
 		this.idDetail = idDetail;
 		this.idNum = idNum;
-		this.corpName = corpName;
 		this.jobInfoHref = jobInfoHref;
+		this.corpName = corpName;
 		this.jobPeriod = jobPeriod;
 		this.corpDetail = corpDetail;
 		this.jobInfoDetail = jobInfoDetail;
@@ -34,8 +26,8 @@ public class DetailVO {
 		super();
 		this.idDetail = data[0];
 		this.idNum = data[1];
-		this.corpName = data[2];
-		this.jobInfoHref = data[3];
+		this.jobInfoHref = data[2];
+		this.corpName = data[3];
 		this.jobPeriod = data[4];
 		this.corpDetail = data[5];
 		this.jobInfoDetail = data[6];
@@ -88,9 +80,13 @@ public class DetailVO {
 	}
 	@Override
 	public String toString() {
-		return "DetailVO \nidDetail=" + idDetail + ", \nidNum=" + idNum + ", \ncorpName=" + corpName + ", \njobInfoHref="
-				+ jobInfoHref + ",\njobPeriod=" + jobPeriod + ", \ncorpDetail=" + corpDetail + ", \njobInfoDetail="
-				+ jobInfoDetail;
+		return "DetailVO \nidDetail=" + idDetail + 
+				", \nidNum=" + idNum + 
+				", \njobInfoHref=" + jobInfoHref + 
+				", \ncorpName=" + corpName + 
+				",\njobPeriod=" + jobPeriod + 
+				", \ncorpDetail=" + corpDetail + 
+				", \njobInfoDetail=" + jobInfoDetail;
 	}
 	public String toline() {
 		return idDetail + ", "+ idNum + ", " + corpName + ", " + jobInfoHref + "," + jobPeriod + ", " + corpDetail + "," + jobInfoDetail;

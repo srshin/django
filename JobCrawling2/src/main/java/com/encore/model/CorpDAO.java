@@ -104,12 +104,15 @@ public class CorpDAO {
 		ResultSet rs = null;
 		List<String> list = new ArrayList<>();
 		String sql = "select " + column + " from " + DBTableName;
+		System.out.println(sql);
 		conn = OracleDBUtil.dbConnect();
 		try {
 			st = conn.createStatement();
 			rs = st.executeQuery(sql);
 			while (rs.next()) {
-				String string = new String(rs.getString(column)); 
+				String string = rs.getString(column);
+				if (string == null ) string =" ";
+				System.out.println(string);
 				list.add(string);
 			}
 		} catch (SQLException e) {
@@ -133,13 +136,12 @@ public class CorpDAO {
 		System.out.println(sql);
 		conn = OracleDBUtil.dbConnect();
 		try {
-			System.out.println("try");
 			st = conn.createStatement();
 			rs = st.executeQuery(sql);
 			while (rs.next()) {
 				String key= rs.getString(columns2.getKey());
 				String value = rs.getString(columns2.getValue());
-				System.out.println(key+value);
+				//System.out.println(key+value);
 				Entry<String, String> item= new AbstractMap.SimpleEntry<String, String>(key,value);
 				list.add(item);
 
