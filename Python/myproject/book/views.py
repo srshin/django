@@ -81,10 +81,6 @@ def book_new(request):
             #방법1
             #form.save2()  #forms.py의 save2메서드 호출 
             return redirect(reverse('book:list'))
-            
-
-
-
     return render(request, 'book/book_form.html', {'form':form})
 
 
@@ -111,16 +107,18 @@ def searchData(request):
 
 class BookListView(ListView):
     model=Book
-    paginate_by=5
+    paginate_by=10
     template_name='book/book_list.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        print (context)
         paginator = context['paginator']
-        page_numbers_range = 5  # Display only 5 page numbers
+        page_numbers_range = 10  # Display 5 page numbers
         max_index = len(paginator.page_range)
 
         page = self.request.GET.get('page')
+        print (self.request)
         current_page = int(page) if page else 1
 
         start_index = int((current_page - 1) / page_numbers_range) * page_numbers_range
