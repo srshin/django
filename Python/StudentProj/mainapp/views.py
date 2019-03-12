@@ -7,6 +7,11 @@ major_list = ListView.as_view(model =  Major, template_name="mainapp/major_all_l
 major_detail = DetailView.as_view(model = Major, template_name="mainapp/major_view_detail.html")  #object를 가지고 object_detail.html로 render 
 major_new = CreateView.as_view(model =  Major, template_name="mainapp/major_input_form.html", fields='__all__') # object_form.html 
 major_edit = UpdateView.as_view(model = Major, template_name="mainapp/major_input_form.html", fields='__all__') # object_form.html
-major_delete = DeleteView.as_view(model =  Major, template_name="mainapp/major_delete.html", success_url='/main/') # object_confirm_delete.html
+major_delete = DeleteView.as_view(model =  Major, template_name="mainapp/major_delete.html", success_url='/main/list') # object_confirm_delete.html
+
+def index(request):
+    response = render(request, 'mainapp/index.html', {'message':"Student Project"})    
+    return response
+
 def major_search():
     pass
