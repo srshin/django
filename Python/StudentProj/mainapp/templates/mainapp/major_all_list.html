@@ -1,105 +1,108 @@
-<html>
-<header>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-
-<style>
-   h1 { background-color : orange;  }
-</style>
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+{% extends "base.html" %}
+{% block head %}
 <script>
-$(function(){
-    $('#btn1').click(function(){
-        //alert("ajax코드");
-        $.ajax({
-            url:'/major/search/',
-            dataType:'json',
-            type:'POST',
-            data:{'mydata' : $('#msg').val() },
-            success:function(result){
-                //alert(result);
-                //$('#here').text(result['msg'])
-                result = JSON.parse(result);
-                //alert(result);
-                $('#here').text(result["fields"]["title"]);
-                //$('#here').text(result)
-            }
+    $(function () {
+        $('#btn1').click(function () {
+            //alert("ajax코드");
+            $.ajax({
+                url: '/major/search/',
+                dataType: 'json',
+                type: 'POST',
+                data: { 'mydata': $('#msg').val() },
+                success: function (result) {
+                    //alert(result);
+                    //$('#here').text(result['msg'])
+                    result = JSON.parse(result);
+                    //alert(result);
+                    $('#here').text(result["fields"]["title"]);
+                    //$('#here').text(result)
+                }
+            });
         });
     });
-});
 </script>
-</header>
-<body>
-<h1>전공 목록</h1>
-
-
-<hr>
-<a href='{% url 'main:major_new' %}'>신규등록 </a>
-<input type="text" id="msg" >
-<button id='btn1'>검색</button>
-<div id="here">여기에 출력합니다.</div>
-<hr>
-<table border="1">
-<tr>
- <td>ID</td><td>전공명</td><td>수정</td><td>삭제</td>
-</tr>
-{% for obj in major_list %} 
- <tr>
-  <td>{{obj.id}}</td> 
-  <td><a href="{% url 'main:major_detail' obj.id %}">{{obj.title}}</a></td>
-  <td><button class="btn btn-outline-info btn-sm" onclick="location.href='{% url 'main:major_edit' obj.id %}'">수정하기</button></td>
-  <td><button class="btn btn-outline-info btn-sm" onclick="location.href='{% url 'main:major_delete' obj.id %}'">삭제하기</button></td>
-      
-  </tr>
-{% endfor %}
-</table>
-
+{% endblock head %}
+{% block body %}
 <div class="container">
-            <!-- Pagination -->
-            {% if is_paginated %}
-            <nav>
-                <ul class="pagination justify-content-center" style="margin:20px 0">
-                {% if page_obj.has_previous %}
-                    <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
-                        <span>Prev</span>
-                    </a>
-                    </li>
-                {% else %}
-                    <li class="disabled page-item">
-                    <a class="page-link" href="#">
-                        <span>Prev</span>
-                    </a>
-                    </li>
-                {% endif %}
-                
-                {% for page in page_range %}
-                    <li {% if page == page_obj.number %} class="active page-item" {% endif %}>
-                    <a class="page-link" href="?page={{ page }}">{{ page }}</a>
-                    </li>
-                {% endfor %}
-                {% if page_obj.has_next %}
-                    <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">
-                        <span>Next</span>
-                    </a>
-                    </li>
-                {% else %}
-                    <li {% if not page_obj.has_next %}class="disabled page-item"{% endif %}>
-                    <a class="page-link" href="#">
-                        <span>Next</span>
-                    </a>
-                    </li>
-                {% endif %}
-                </ul>
-            </nav>
-            {% endif %}
+    <h1>전공 목록</h1>
+
+    <a href='{% url 'main:major_new' %}'>신규등록 </a><br>
+    <div class="input-group">
+        <input type="text" id="msg" class="form-control" placeholder="검색">
+        <div class="input-group-append">
+            <button class="btn btn-dark" id='btn1'>
+                <i class="fas fa-search"></i>
+            </button>
+        </div>
     </div>
-    
-</body>
-</html>
+
+    <div id="here">여기에 출력합니다.</div>
+</div>
+<div class="container">
+
+    <table class="table table-hover">
+        <thead>
+            <th>ID</th>
+            <th>전공명</th>
+            <th>수정</th>
+            <th>삭제</th>
+        </thead>
+        <tbody>
+
+            {% for obj in major_list %}
+            <tr>
+                <td>{{obj.id}}</td>
+                <td><a href="{% url 'main:major_detail' obj.id %}">{{obj.title}}</a></td>
+                <td><button class="btn btn-outline-info btn-sm"
+                        onclick="location.href='{% url 'main:major_edit' obj.id %}'">수정하기</button></td>
+                <td><button class="btn btn-outline-info btn-sm"
+                        onclick="location.href='{% url 'main:major_delete' obj.id %}'">삭제하기</button></td>
+
+            </tr>
+            {% endfor %}
+        </tbody>
+
+    </table>
+</div>
+<div class="container">
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <nav>
+        <ul class="pagination justify-content-center" style="margin:20px 0">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                    <span>Prev</span>
+                </a>
+            </li>
+            {% else %}
+            <li class="disabled page-item">
+                <a class="page-link" href="#">
+                    <span>Prev</span>
+                </a>
+            </li>
+            {% endif %}
+
+            {% for page in page_range %}
+            <li {% if page == page_obj.number %} class="active page-item" {% endif %}>
+                <a class="page-link" href="?page={{ page }}">{{ page }}</a>
+            </li>
+            {% endfor %}
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                    <span>Next</span>
+                </a>
+            </li>
+            {% else %}
+            <li {% if not page_obj.has_next %}class="disabled page-item" {% endif %}>
+                <a class="page-link" href="#">
+                    <span>Next</span>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock body %}

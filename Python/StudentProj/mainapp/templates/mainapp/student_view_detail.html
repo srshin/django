@@ -1,7 +1,11 @@
-
+{% extends "base.html" %}
+{% block body %}  
+<div class="container">
 <h1>  상세보기</h1>
 
 아이디 : {{student.id}} <br>
 이름   : {{student.name}} <br>
 기술   : {{student.skill}} <br>
 전공명 : {{student.major}}
+</div>
+{% endblock body %}
