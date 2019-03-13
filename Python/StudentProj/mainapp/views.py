@@ -1,13 +1,21 @@
 from django.shortcuts import render
-from .models import Major
+from .models import Major, Student
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic import ListView, DetailView
 # 자동으로 create하고나서 success인 경우 model의 get_absolute_url로 이동함. 
+
+student_list = ListView.as_view(model =  Student, template_name="mainapp/student_all_list.html", paginate_by=10) # #object_list를 가지고 object_list.html로 render 
+student_detail = DetailView.as_view(model = Student, template_name="mainapp/student_view_detail.html")  #object를 가지고 object_detail.html로 render 
+student_new = CreateView.as_view(model =  Student, template_name="mainapp/student_input_form.html", fields='__all__') # object_form.html 
+student_edit = UpdateView.as_view(model = Student, template_name="mainapp/student_input_form.html", fields='__all__') # object_form.html
+student_delete = DeleteView.as_view(model =  Student, template_name="mainapp/student_delete.html", success_url='/main/student/list') # object_confirm_delete.html
+
+
 #major_list = ListView.as_view(model =  Major, template_name="mainapp/major_all_list.html", paginate_by=10) # #object_list를 가지고 object_list.html로 render 
 major_detail = DetailView.as_view(model = Major, template_name="mainapp/major_view_detail.html")  #object를 가지고 object_detail.html로 render 
 major_new = CreateView.as_view(model =  Major, template_name="mainapp/major_input_form.html", fields='__all__') # object_form.html 
 major_edit = UpdateView.as_view(model = Major, template_name="mainapp/major_input_form.html", fields='__all__') # object_form.html
-major_delete = DeleteView.as_view(model =  Major, template_name="mainapp/major_delete.html", success_url='/main/list') # object_confirm_delete.html
+major_delete = DeleteView.as_view(model =  Major, template_name="mainapp/major_delete.html", success_url='/main/major/list') # object_confirm_delete.html
 
 class MajorListView(ListView):
     model=Major
@@ -41,4 +49,7 @@ def index(request):
     return response
 
 def major_search():
+    pass
+
+def student_search():
     pass

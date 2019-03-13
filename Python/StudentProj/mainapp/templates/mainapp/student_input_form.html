@@ -1,0 +1,6 @@
+<h1>입력 /수정 </h1>
+<form method='post' enctype="multipart/form-data">
+  {% csrf_token %}
+  {{form.as_p}}
+  <input type = "submit" value="저장하기"/>
+</form>

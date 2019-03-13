@@ -17,7 +17,7 @@ $(function(){
     $('#btn1').click(function(){
         //alert("ajax코드");
         $.ajax({
-            url:'/major/search/',
+            url:'/student/search/',
             dataType:'json',
             type:'POST',
             data:{'mydata' : $('#msg').val() },
@@ -39,21 +39,24 @@ $(function(){
 
 
 <hr>
-<a href='{% url 'main:major_new' %}'>신규등록 </a>
+<a href='{% url 'main:student_new' %}'>신규등록 </a>
 <input type="text" id="msg" >
 <button id='btn1'>검색</button>
 <div id="here">여기에 출력합니다.</div>
 <hr>
 <table border="1">
 <tr>
- <td>ID</td><td>전공명</td><td>수정</td><td>삭제</td>
+ <td>ID</td><td>이름</td><td>전공</td><td>기술</td><td>수정</td><td>삭제</td>
 </tr>
-{% for obj in major_list %} 
+{% for obj in student_list %} 
  <tr>
-  <td>{{obj.id}}</td> 
-  <td><a href="{% url 'main:major_detail' obj.id %}">{{obj.title}}</a></td>
-  <td><button class="btn btn-outline-info btn-sm" onclick="location.href='{% url 'main:major_edit' obj.id %}'">수정하기</button></td>
-  <td><button class="btn btn-outline-info btn-sm" onclick="location.href='{% url 'main:major_delete' obj.id %}'">삭제하기</button></td>
+  <td>{{obj.id}}</td>
+  <td><a href="{% url 'main:student_detail' obj.id %}">{{obj.name}}</a></td>
+  <td><a href="{% url 'main:student_detail' obj.id %}">{{obj.major}}</a></td>
+  <td><a href="{% url 'main:student_detail' obj.id %}">{{obj.skill}}</a></td>
+
+  <td><button class="btn btn-outline-info btn-sm" onclick="location.href='{% url 'main:student_edit' obj.id %}'">수정하기</button></td>
+  <td><button class="btn btn-outline-info btn-sm" onclick="location.href='{% url 'main:student_delete' obj.id %}'">삭제하기</button></td>
       
   </tr>
 {% endfor %}
