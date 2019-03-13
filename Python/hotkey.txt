@@ -1,0 +1,3 @@
+﻿shift+alt+ctrl block selection
+shift +` focus on workspace
+ctrl +2 split window

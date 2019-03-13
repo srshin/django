@@ -1,4 +1,7 @@
-<h2>삭제확인</h2>
+{% extends "base.html" %}
+{% block body %}  
+
+  <h2>삭제확인</h2>
 
 <form method='post'>
     {% csrf_token %}
@@ -6,3 +9,4 @@
     <input type="submit" value="예,삭제하겠습니다."/>
 
 </form>
+  {% endblock body %}

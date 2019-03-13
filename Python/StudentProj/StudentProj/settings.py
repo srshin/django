@@ -56,7 +56,9 @@ ROOT_URLCONF = 'StudentProj.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            os.path.join(BASE_DIR, 'StudentProj','templates'),
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -131,4 +133,13 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
+#static file URL prefix
 STATIC_URL = '/static/'
+
+#개발환경 
+STATICFILES_DIRS=[ os.path.join(BASE_DIR, 'StudentProj', 'static'), 
+                   os.path.join(BASE_DIR, 'mainapp', 'static')                  
+                  ]
+
+#배포시 ....>>python manage.py collectstatic 
+STATIC_ROOT = os.path.join(BASE_DIR, '..', 'staticfiles')
