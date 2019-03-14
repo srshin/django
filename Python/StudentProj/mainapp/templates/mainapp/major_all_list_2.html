@@ -1,0 +1,22 @@
+    <div class="container">
+        <table class="table table-hover">
+            <thead>
+                <th>ID</th>
+                <th>전공명</th>
+                <th>수정</th>
+                <th>삭제</th>
+            </thead>
+            <tbody>
+                {% for obj in major_list %}
+                <tr>
+                    <td>{{obj.id}}</td>
+                    <td><a href="{% url 'main:major_detail' obj.id %}">{{obj.title}}</a></td>
+                    <td><button class="btn btn-outline-info btn-sm"
+                            onclick="location.href='{% url 'main:major_edit' obj.id %}'">수정하기</button></td>
+                    <td><button class="btn btn-outline-info btn-sm"
+                            onclick="location.href='{% url 'main:major_delete' obj.id %}'">삭제하기</button></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>

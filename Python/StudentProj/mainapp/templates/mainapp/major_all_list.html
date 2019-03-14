@@ -5,16 +5,16 @@
         $('#btn1').click(function () {
             //alert("ajax코드");
             $.ajax({
-                url: '/major/search/',
-                dataType: 'json',
+                url: '/main/major/search/',
+                dataType: 'text',
                 type: 'POST',
                 data: { 'mydata': $('#msg').val() },
                 success: function (result) {
                     //alert(result);
+                    $('#here').html(result)
+                    //result = JSON.parse(result);
                     //$('#here').text(result['msg'])
-                    result = JSON.parse(result);
-                    //alert(result);
-                    $('#here').text(result["fields"]["title"]);
+                    //$('#here').text(result["fields"]["title"]);
                     //$('#here').text(result)
                 }
             });
@@ -25,7 +25,6 @@
 {% block body %}
 <div class="container">
     <h1>전공 목록</h1>
-
     <a href='{% url 'main:major_new' %}'>신규등록 </a><br>
     <div class="input-group">
         <input type="text" id="msg" class="form-control" placeholder="검색">
@@ -35,37 +34,34 @@
             </button>
         </div>
     </div>
-
-    <div id="here">여기에 출력합니다.</div>
 </div>
-<div class="container">
-
-    <table class="table table-hover">
-        <thead>
-            <th>ID</th>
-            <th>전공명</th>
-            <th>수정</th>
-            <th>삭제</th>
-        </thead>
-        <tbody>
-
-            {% for obj in major_list %}
-            <tr>
-                <td>{{obj.id}}</td>
-                <td><a href="{% url 'main:major_detail' obj.id %}">{{obj.title}}</a></td>
-                <td><button class="btn btn-outline-info btn-sm"
-                        onclick="location.href='{% url 'main:major_edit' obj.id %}'">수정하기</button></td>
-                <td><button class="btn btn-outline-info btn-sm"
-                        onclick="location.href='{% url 'main:major_delete' obj.id %}'">삭제하기</button></td>
-
-            </tr>
-            {% endfor %}
-        </tbody>
-
-    </table>
+<!-- List -->
+<div id="here">
+    <div class="container">
+        <table class="table table-hover">
+            <thead>
+                <th>ID</th>
+                <th>전공명</th>
+                <th>수정</th>
+                <th>삭제</th>
+            </thead>
+            <tbody>
+                {% for obj in major_list %}
+                <tr>
+                    <td>{{obj.id}}</td>
+                    <td><a href="{% url 'main:major_detail' obj.id %}">{{obj.title}}</a></td>
+                    <td><button class="btn btn-outline-info btn-sm"
+                            onclick="location.href='{% url 'main:major_edit' obj.id %}'">수정하기</button></td>
+                    <td><button class="btn btn-outline-info btn-sm"
+                            onclick="location.href='{% url 'main:major_delete' obj.id %}'">삭제하기</button></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
+<!-- Pagination -->
 <div class="container">
-    <!-- Pagination -->
     {% if is_paginated %}
     <nav>
         <ul class="pagination justify-content-center" style="margin:20px 0">
