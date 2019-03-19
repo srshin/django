@@ -1,14 +1,26 @@
 {% extends "base.html" %}
 {% block head %}
 <script>
+
+page=1
+mydata=''
+
+function call(p){
+        page = p;
+        mydata = $('#msg').val();
+        //alert(mydata + ":" + page);
+        $('#btn1').trigger("click");
+}
+
     $(function () {
         $('#btn1').click(function () {
             //alert("ajax코드");
             $.ajax({
-                url: '/main/student/search/',
+                url: '/main/student/list/',
                 dataType: 'text',
                 type: 'POST',
-                data: { 'mydata': $('#msg').val() },
+                data: { 'mydata': $('#msg').val(),
+                        'page' :page },
                 success: function (result) {
                     //alert(result);
                     $('#here').html(result)
@@ -19,6 +31,8 @@
                 }
             });
         });
+            $('#btn1').trigger("click");
+
     });
 </script>
 {% endblock head %}
@@ -36,76 +50,6 @@
         </div>
     </div>
 </div>
-<div class="container">
-    <div id="here">
-    <table class="table table-hover">
-        <thead>
-            <th>ID</th>
-            <th>이름</th>
-            <th>전공</th>
-            <th>기술</th>
-            <th>수정</th>
-            <th>삭제</th>
-        </thead>
-        <tbody>
-            {% for obj in student_list %}
-            <tr>
-                <td>{{obj.id}}</td>
-                <td><a href="{% url 'main:student_detail' obj.id %}">{{obj.name}}</a></td>
-                <td><a href="{% url 'main:student_detail' obj.id %}">{{obj.major}}</a></td>
-                <td><a href="{% url 'main:student_detail' obj.id %}">{{obj.skill}}</a></td>
-
-                <td><button class="btn btn-outline-info btn-sm"
-                        onclick="location.href='{% url 'main:student_edit' obj.id %}'">수정하기</button></td>
-                <td><button class="btn btn-outline-info btn-sm"
-                        onclick="location.href='{% url 'main:student_delete' obj.id %}'">삭제하기</button></td>
-
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    </div>
-    </div>
-
-    <div class="container">
-        <!-- Pagination -->
-        {% if is_paginated %}
-        <nav>
-            <ul class="pagination justify-content-center" style="margin:20px 0">
-                {% if page_obj.has_previous %}
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
-                        <span>Prev</span>
-                    </a>
-                </li>
-                {% else %}
-                <li class="disabled page-item">
-                    <a class="page-link" href="#">
-                        <span>Prev</span>
-                    </a>
-                </li>
-                {% endif %}
-
-                {% for page in page_range %}
-                <li {% if page == page_obj.number %} class="active page-item" {% endif %}>
-                    <a class="page-link" href="?page={{ page }}">{{ page }}</a>
-                </li>
-                {% endfor %}
-                {% if page_obj.has_next %}
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">
-                        <span>Next</span>
-                    </a>
-                </li>
-                {% else %}
-                <li {% if not page_obj.has_next %}class="disabled page-item" {% endif %}>
-                    <a class="page-link" href="#">
-                        <span>Next</span>
-                    </a>
-                </li>
-                {% endif %}
-            </ul>
-        </nav>
-        {% endif %}
-    </div>
-    {% endblock body %}
+<div id="here">
+</div>
+{% endblock body %}

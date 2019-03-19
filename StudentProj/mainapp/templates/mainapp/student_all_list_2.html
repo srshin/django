@@ -1,3 +1,4 @@
+<div class="container">
     <table class="table table-hover">
         <thead>
             <th>ID</th>
@@ -14,13 +15,54 @@
                 <td><a href="{% url 'main:student_detail' obj.id %}">{{obj.name}}</a></td>
                 <td><a href="{% url 'main:student_detail' obj.id %}">{{obj.major}}</a></td>
                 <td><a href="{% url 'main:student_detail' obj.id %}">{{obj.skill}}</a></td>
-
                 <td><button class="btn btn-outline-info btn-sm"
                         onclick="location.href='{% url 'main:student_edit' obj.id %}'">수정하기</button></td>
                 <td><button class="btn btn-outline-info btn-sm"
                         onclick="location.href='{% url 'main:student_delete' obj.id %}'">삭제하기</button></td>
-
             </tr>
             {% endfor %}
         </tbody>
     </table>
+</div>
+
+<div class="container">
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <nav>
+        <ul class="pagination justify-content-center" style="margin:20px 0">
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+            <a class="page-link" href="javascript:call({{ page_obj.previous_page_number }})">
+                <span>Prev</span>
+            </a>
+            </li>
+        {% else %}
+            <li class="disabled page-item">
+            <a class="page-link" href="#">
+                <span>Prev</span>
+            </a>
+            </li>
+        {% endif %}
+        
+        {% for page in page_range %}
+            <li {% if page == page_obj.number %} class="active page-item" {% endif %}>
+            <a class="page-link" href="javascript:call({{ page }});">{{ page }}</a>
+            </li>
+        {% endfor %}
+        {% if page_obj.has_next %}
+            <li class="page-item">
+            <a class="page-link" href="javascript:call({{ page_obj.next_page_number }})">
+                <span>Next</span>
+            </a>
+            </li>
+        {% else %}
+            <li {% if not page_obj.has_next %}class="disabled page-item"{% endif %}>
+            <a class="page-link" href="#">
+                <span>Next</span>
+            </a>
+            </li>
+        {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>    

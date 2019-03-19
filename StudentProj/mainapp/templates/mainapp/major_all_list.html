@@ -1,25 +1,38 @@
 {% extends "base.html" %}
 {% block head %}
 <script>
-    $(function () {
-        $('#btn1').click(function () {
-            //alert("ajax코드");
-            $.ajax({
-                url: '/main/major/search/',
-                dataType: 'text',
-                type: 'POST',
-                data: { 'mydata': $('#msg').val() },
-                success: function (result) {
+
+page=1
+mydata=''
+
+function call(p){
+        page = p;
+        mydata = $('#msg').val();
+        //alert(mydata + ":" + page);
+        $('#btn1').trigger("click");
+}
+
+$(function () {
+    $('#btn1').click(function () {
+        //alert("ajax코드");
+        $.ajax({
+            url: '/main/major/list/',
+            dataType: 'text',
+            type: 'POST',
+            data: { 'mydata': $('#msg').val(),
+                        'page' :page },
+            success: function (result) {
                     //alert(result);
                     $('#here').html(result)
                     //result = JSON.parse(result);
                     //$('#here').text(result['msg'])
                     //$('#here').text(result["fields"]["title"]);
                     //$('#here').text(result)
-                }
-            });
+            }
         });
     });
+    $('#btn1').trigger("click");
+});
 </script>
 {% endblock head %}
 {% block body %}
@@ -37,68 +50,5 @@
 </div>
 <!-- List -->
 <div id="here">
-    <div class="container">
-        <table class="table table-hover">
-            <thead>
-                <th>ID</th>
-                <th>전공명</th>
-                <th>수정</th>
-                <th>삭제</th>
-            </thead>
-            <tbody>
-                {% for obj in major_list %}
-                <tr>
-                    <td>{{obj.id}}</td>
-                    <td><a href="{% url 'main:major_detail' obj.id %}">{{obj.title}}</a></td>
-                    <td><button class="btn btn-outline-info btn-sm"
-                            onclick="location.href='{% url 'main:major_edit' obj.id %}'">수정하기</button></td>
-                    <td><button class="btn btn-outline-info btn-sm"
-                            onclick="location.href='{% url 'main:major_delete' obj.id %}'">삭제하기</button></td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
-<!-- Pagination -->
-<div class="container">
-    {% if is_paginated %}
-    <nav>
-        <ul class="pagination justify-content-center" style="margin:20px 0">
-            {% if page_obj.has_previous %}
-            <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
-                    <span>Prev</span>
-                </a>
-            </li>
-            {% else %}
-            <li class="disabled page-item">
-                <a class="page-link" href="#">
-                    <span>Prev</span>
-                </a>
-            </li>
-            {% endif %}
-
-            {% for page in page_range %}
-            <li {% if page == page_obj.number %} class="active page-item" {% endif %}>
-                <a class="page-link" href="?page={{ page }}">{{ page }}</a>
-            </li>
-            {% endfor %}
-            {% if page_obj.has_next %}
-            <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.next_page_number }}">
-                    <span>Next</span>
-                </a>
-            </li>
-            {% else %}
-            <li {% if not page_obj.has_next %}class="disabled page-item" {% endif %}>
-                <a class="page-link" href="#">
-                    <span>Next</span>
-                </a>
-            </li>
-            {% endif %}
-        </ul>
-    </nav>
-    {% endif %}
 </div>
 {% endblock body %}
