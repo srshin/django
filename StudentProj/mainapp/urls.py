@@ -11,13 +11,12 @@ urlpatterns = [
     path('major/new/', views.major_new, name='major_new'),
     path('<pk>/major/edit/', views.major_edit, name='major_edit'),
     path('<pk>/major/delete/', views.major_delete, name='major_delete'),
-    path('major/search/', views.major_search, name='major_search'),
 
     path('student/list/', views.student_list, name='student_list'),
     path('<pk>/student/detail/', views.student_detail, name='student_detail'),
     path('student/new/', views.student_new, name='student_new'),
     path('<pk>/student/edit/', views.student_edit, name='student_edit'),
     path('<pk>/student/delete/', views.student_delete, name='student_delete'),
-    path('student/search/', views.student_search, name='student_search'),
+
 
 ]
